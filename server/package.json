@@ -1,0 +1,15 @@
+{
+  "name": "pairwise-collector",
+  "description" : "Web application to gather data from pariwise comparisons",
+  "main": "server.js",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/ebshimizu/pairwise-collector.git"
+  },
+  "dependencies": {
+    "mongodb": "~2.0",
+    "socket.io" : "~1.3.2"
+  },
+  "author": "Evan Shimizu",
+  "license": "GNU GPL v2"
+}
