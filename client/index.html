@@ -2,16 +2,35 @@
   <head>
     <script src="http://localhost/socket.io/socket.io.js"></script>
     <script type="text/javascript" src="http://code.jquery.com/jquery-2.1.3.min.js"></script>
+    <script type="text/javascript" src="jquery-ui/jquery-ui.min.js"></script>
     <script type="text/javascript" src="client.js"></script>
     <link rel="stylesheet" type="text/css" href="style.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-ui/jquery-ui.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-ui/jquery-ui.structure.css" />
+    <link rel="stylesheet" type="text/css" href="jquery-ui/jquery-ui.theme.css" />
   </head>
   <body>
     <div id="titleBar">
       <div class="experimentName"></div>
+      <div id="attributeMenu">
+        <form action="#">
+          <select name="attribute" id="attribute" onchange="selectAttribute()">
+            <option name="blank">[No Attribute Selected]</option>
+          </select>
+        </form>
+      </div>
     </div>
-    <div id="welcome">
-      <div id="welcomeText"></div>
-      <div id="nameField"></div>
+    <div id="content">
+      <div id="welcome">
+        <div id="welcomeText"></div>
+        <div id="nameField">
+          <!-- Pretty this up later -->
+          Username: <input type="text" name="username" id="username" /><button id="usernameGo" type="button">Begin</button>
+        </div>
+      </div>
+      <div id="pairwise">
+        <!-- main content stuff here -->
+      </div>
     </div>
   </body>
 </html>

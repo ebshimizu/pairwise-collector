@@ -1,0 +1,61 @@
+body {
+  font-family: 'Lucida Grande', 'Arial', sans-serif;
+  margin: 1.9em 0 0 0;
+  padding: 0;
+  background-color: #1c1c1c;
+  color: white;
+}
+
+#titleBar {
+  position: fixed;
+  display: block;
+  left: 0;
+  top: 0;
+  height: 1.8em;
+  padding: 5px;
+  width: 100%;
+}
+
+#titleBar .experimentName {
+  color: white;
+  font-size: 15pt;
+  text-align: center;
+  width: 80%;
+  display: block;
+  margin: 0 auto;
+  vertical-align: center;
+}
+
+#content {
+  width: 98%;
+  margin: 0 auto;
+  display: block;
+  padding: 5px;
+}
+
+#nameField {
+  display: block;
+}
+
+#attribute {
+  max-height: 400px;
+  width: 260px;
+}
+
+#attributeMenu {
+  display: block;
+  float: left;
+}
+
+#attributeMenu #attribute-button {
+  height: 29px;
+  font-size: 10pt;
+  display: block;
+  position: absolute;
+  left: 10;
+  top: 5;
+}
+
+.ui-widget {
+  font-size: 10pt !important;
+}

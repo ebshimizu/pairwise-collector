@@ -4,6 +4,7 @@ var MongoClient = require('mongodb').MongoClient
 var app = require('http').createServer(handler)
 var io = require('socket.io')(app);
 var fs = require('fs');
+var userData = {};
 
 app.listen(80);
 
@@ -33,13 +34,12 @@ MongoClient.connect(url, function(err, db) {
   var data = db.collection('data');
 
   io.on('connection', function(s) {
-    console.log("Client connected");
+    userData[s.id] = { "ip" : s.conn.remoteAddress };
+    console.log("Client connected from " + s.conn.remoteAddress);
 
     s.on('getFrontPageData', function(fn) {
-      console.log('finding data')
       settings.find({'name' : 'core_settings'}).toArray(function(err, result) {
-        console.log(result[0]);
-        if (!err) {
+        if (err == null) {
           fn(result[0].experiment_name, result[0].welcome_text);
         }
         else {
@@ -47,6 +47,19 @@ MongoClient.connect(url, function(err, db) {
         }
       });
     });
+
+    s.on('login', function(username) {
+      // store username with socket for logging purposes
+      userData[s.id].username = username;
+
+      // Need to now gather all data to send to the client for the experiment setup.
+      // At this point it just needs a list of attributes available for judgement. User will select one
+      // and then the comparisons can begin.
+      // The settings collection stores available attributes. they are tagged as "attribute."
+      settings.find({'type' : 'attribute'}).toArray(function(err, attrs) {
+        s.emit('initStage', attrs);
+      });
+    })
   });
 
 
