@@ -15,7 +15,7 @@
       <div id="attributeMenu">
         <form action="#">
           <select name="attribute" id="attribute" onchange="selectAttribute()">
-            <option name="blank">[No Attribute Selected]</option>
+            <option name="blank" id="blankAttribute"></option>
           </select>
         </form>
       </div>
@@ -29,7 +29,15 @@
         </div>
       </div>
       <div id="pairwise">
-        <!-- main content stuff here -->
+        <p id="initialPrompt">Select an attribute from the menu in the top left to begin.</p>
+        <span class="prompt"></span>
+        <div id="ex1">
+          
+        </div>
+        <div class="spacer"></div>
+        <div id="ex2">
+          
+        </div>
       </div>
     </div>
   </body>

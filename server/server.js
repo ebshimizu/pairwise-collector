@@ -59,7 +59,74 @@ MongoClient.connect(url, function(err, db) {
       settings.find({'type' : 'attribute'}).toArray(function(err, attrs) {
         s.emit('initStage', attrs);
       });
-    })
+    });
+
+    s.on('getAttributePair', function(attribute) {
+      // Generating an attribute pair
+      // Should pull two random images that the user has not seen together yet.
+      // Available image pairs are stored in the settings collection with type "example"
+      // Need to do a series of queries here. Won't be terribly fast.
+      settings.find({'type' : 'example'}).toArray(function(err, examples) {
+        var available = {};
+
+        // enumerate possible pairings.
+        for (var i = 0; i < examples.length; i++) {
+          available[examples[i].id] = [];
+          for (var j = i + 1; j < examples.length; j++) {
+            available[examples[i].id].push(examples[j].id);
+          }
+        }
+
+        // Get list of things user has seen already
+        users.find({'user' : userData[s.id].username, 'attribute' : attribute}).toArray(function(err, comp) {
+          // remove things user has seen 
+          for (var i = 0; i < comp.length; i++) {
+            // entries are in the form: { p: id, q: id, ...}
+            var x1 = available[comp[i].x];
+            var idx = x1.indexOf(comp[i].y);
+            x1.splice(idx, 1);
+          }
+
+          var pairs = [];
+
+          // reformat object for random selection 
+          for (var prop in available) {
+            if (!available.hasOwnProperty(prop)) {
+              continue;
+            }
+            for (var i = 0; i < available[prop].length; i++) {
+              pairs.push({"id1" : parseInt(prop), "id2" : available[prop][i]});
+            }
+          }
+          console.log(pairs);
+          var selected = pairs[Math.floor(Math.random() * pairs.length)];
+          s.emit('newPair', selected.id1, selected.id2);
+        })
+      });
+    });
+
+    s.on('userSelected', function(chosen, notChosen, attribute) {
+      // Save the entry in the main results database
+      // entries are stored with p < q
+      var x = (chosen < notChosen) ? chosen : notChosen;
+      var y = (chosen < notChosen) ? notChosen : chosen;
+
+      if (x == chosen) {
+        data.findAndModify({'x' : x, 'y' : y, 'attribute' : attribute}, [['x', 1]],
+          { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });
+      }
+      else if (y == chosen) {
+        data.findAndModify({'x' : x, 'y' : y, 'attribute' : attribute}, [['x', 1]],
+          { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
+      }
+
+      users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : 
+        userData[s.id].ip}, null, function(err, res) {});
+    });
+
+    s.on('disconnect', function() {
+      delete userData[s.id];
+    });
   });
 
 
