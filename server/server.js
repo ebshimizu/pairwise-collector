@@ -98,7 +98,12 @@ MongoClient.connect(url, function(err, db) {
               pairs.push({"id1" : parseInt(prop), "id2" : available[prop][i]});
             }
           }
-          console.log(pairs);
+
+          if (pairs.length == 0) {
+            s.emit('outOfExamples', attribute);
+            return;
+          }
+
           var selected = pairs[Math.floor(Math.random() * pairs.length)];
           s.emit('newPair', selected.id1, selected.id2);
         })

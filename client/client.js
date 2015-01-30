@@ -32,6 +32,12 @@ socket.on('newPair', function(ex1, ex2) {
   $("#ex2").html('<img src="images/' + ex2 + '.jpg" class="example right" />');
 });
 
+socket.on('outOfExamples', function(attribute) {
+  $('.prompt').html('No more comparisons needed for this attribute. Please select a new attribute.');
+  $("#ex1").html("");
+  $("#ex2").html("");
+});
+
 function doSetup() {
   socket.emit('getFrontPageData', function(title, msg) {
     $('#titleBar .experimentName').html(title);
