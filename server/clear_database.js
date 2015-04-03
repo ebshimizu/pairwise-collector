@@ -16,4 +16,8 @@ MongoClient.connect(url, function(err, db) {
   // Deletes all data from the users and data collections.
   users.remove(function(err, r) {});
   data.remove(function(err, r) {});
+  settings.remove({'type' : 'example'}, function(err, r) {});
+  settings.remove({'type' : 'attribute'}, function(err, r) {});
+
+  process.exit(0);
 });

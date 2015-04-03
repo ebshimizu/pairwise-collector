@@ -28,8 +28,8 @@ socket.on('newPair', function(ex1, ex2) {
   choice1 = ex1;
   choice2 = ex2;
 
-  $("#ex1").html('<img src="images/' + ex1 + '.jpg" class="example left" />');
-  $("#ex2").html('<img src="images/' + ex2 + '.jpg" class="example right" />');
+  $("#ex1").html('<img src="images/' + ex1 + '.png" class="example left" />');
+  $("#ex2").html('<img src="images/' + ex2 + '.png" class="example right" />');
 });
 
 socket.on('outOfExamples', function(attribute) {

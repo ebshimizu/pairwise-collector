@@ -66,7 +66,7 @@ MongoClient.connect(url, function(err, db) {
       // Should pull two random images that the user has not seen together yet.
       // Available image pairs are stored in the settings collection with type "example"
       // Need to do a series of queries here. Won't be terribly fast.
-      settings.find({'type' : 'example'}).toArray(function(err, examples) {
+      settings.find({'type' : 'example'}).sort({'id' : 1}).toArray(function(err, examples) {
         var available = {};
 
         // enumerate possible pairings.
@@ -84,7 +84,9 @@ MongoClient.connect(url, function(err, db) {
             // entries are in the form: { p: id, q: id, ...}
             var x1 = available[comp[i].x];
             var idx = x1.indexOf(comp[i].y);
-            x1.splice(idx, 1);
+
+            if (idx != -1)
+              x1.splice(idx, 1);
           }
 
           var pairs = [];
@@ -99,6 +101,7 @@ MongoClient.connect(url, function(err, db) {
             }
           }
 
+          console.log("User " + userData[s.id].username + " has " + pairs.length + " examples remaining for attribute: " + attribute);
           if (pairs.length == 0) {
             s.emit('outOfExamples', attribute);
             return;
@@ -118,15 +121,22 @@ MongoClient.connect(url, function(err, db) {
 
       if (x == chosen) {
         data.findAndModify({'x' : x, 'y' : y, 'attribute' : attribute}, [['x', 1]],
-          { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });
+          { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) {
+            users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : 
+              userData[s.id].ip}, null, function(err, res) {
+
+              });
+          });
       }
       else if (y == chosen) {
         data.findAndModify({'x' : x, 'y' : y, 'attribute' : attribute}, [['x', 1]],
-          { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
-      }
+          { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) {
+            users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : 
+              userData[s.id].ip}, null, function(err, res) {
 
-      users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : 
-        userData[s.id].ip}, null, function(err, res) {});
+              });
+          });
+      }
     });
 
     s.on('disconnect', function() {
