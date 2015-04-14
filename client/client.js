@@ -1,4 +1,4 @@
-var socket = io('http://localhost');
+var socket = io('http://graphics.cs.cmu.edu:37018');
 var uname = "";
 var attrs = [];
 var currentAttribute = "";
