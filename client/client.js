@@ -64,6 +64,13 @@ $(document).ready(function() {
   $("#pairwise").hide();
   $("#attribute").selectmenu();
 
+  $(document).on("keyup", function (e) {
+    console.log(e.which);
+
+    if (e.which == 37) pickOption(1);
+    if (e.which == 39) pickOption(2);
+  });
+
   $("#ex1").on("click", function() {
     pickOption(1);
   });
