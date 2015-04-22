@@ -4,6 +4,7 @@ var attrs = [];
 var currentAttribute = "";
 var choice1;
 var choice2;
+var loggedIn = false;
 
 socket.on('connect', function(socket) {
   // Fill in required data for initial connection
@@ -22,6 +23,11 @@ socket.on('initStage', function(attrs) {
   // Show attributes menu and message to instruct user to pick an attribute.
   $("#attributeMenu").fadeIn();
   $("#pairwise").fadeIn();
+  loggedIn = true;
+});
+
+socket.on('disconnect', function(socket) {
+  loggedIn = false;
 });
 
 socket.on('newPair', function(ex1, ex2) {
@@ -65,10 +71,10 @@ $(document).ready(function() {
   $("#attribute").selectmenu();
 
   $(document).on("keyup", function (e) {
-    console.log(e.which);
-
-    if (e.which == 37) pickOption(1);
-    if (e.which == 39) pickOption(2);
+    if (loggedIn) {
+      if (e.which == 37) pickOption(1);
+      if (e.which == 39) pickOption(2);
+    }
   });
 
   $("#ex1").on("click", function() {

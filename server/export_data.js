@@ -19,44 +19,46 @@ MongoClient.connect(url, function(err, db) {
   // This expects data to be indexed from 1 (so column 1 = example 1)
   settings.find({'type' : 'attribute'}).toArray(function(err, attrs) {
     settings.find({'type' : 'example'}).toArray(function(err, ex) {
-          // For each attribute we want to export a file
+      // For each attribute we want to export a file
       for (var i = 0; i < attrs.length; i++) {
-        exportCSV(attrs[i].name, data, ex.length);
+        exportCSV(attrs[i].name, data, ex.length, i == (attrs.length - 1));
       }
     });
   });
 });
 
 
-function exportCSV(attributeName, data, numExamples) {
+function exportCSV(attributeName, data, numExamples, last) {
+  var gather = {};
+  
+  // initialize object
+  for (var i = 0; i < numExamples; i++) {
+    gather[i + 1] = [];
+  }
+
   // get all data from database relevant to attribute
-  data.find({'attribute' : attributeName}).toArray(function(err, resp) {
-    // drop everything in an object first to sort through data
+  var cursor = data.find({'attribute' : attributeName})
 
-    var gather = {};
+  cursor.forEach(function(resp) {
+    // For each document
+    var x = resp.x;
+    var y = resp.y;
+    var xPy = resp.xPy;
+    var yPx = resp.yPx;
 
-    // initialize object
-    for (var i = 0; i < numExamples; i++) {
-      gather[i + 1] = [];
+    if (typeof xPy === 'undefined') {
+      xPy = 0;
     }
-
-    // Popuolate object
-    for (var i = 0; i < resp.length; i++) {
-      var x = resp[i].x;
-      var y = resp[i].y;
-      var xPy = resp[i].xPy;
-      var yPx = resp[i].yPx;
-
-      if (typeof xPy === 'undefined') {
-        xPy = 0;
-      }
-      if (typeof yPx === 'undefined') {
-        yPx = 0;
-      }
-      gather[x][y - 1] = yPx;
-      gather[y][x - 1] = xPy;
+    if (typeof yPx === 'undefined') {
+      yPx = 0;
     }
-
+    gather[x][y - 1] = yPx;
+    gather[y][x - 1] = xPy;
+  },
+  function(err) {
+    console.log("writing out file for " + attributeName);
+    
+    // Do a thing at the end
     var out = "";
     // Write object to string
     // relies entirely on the assumption that the data is arranged with ids from 1-n
@@ -81,13 +83,9 @@ function exportCSV(attributeName, data, numExamples) {
     }
 
     // write to file
-    fs.writeFile("out/" + attributeName + ".csv", out, function(err) {
-      if (err) {
-        console.log(err);
-      }
-      else {
-        console.log("Saved CSV for " + attributeName);
-      }
-    });
+    fs.writeFileSync("out/" + attributeName + ".csv", out);
+    console.log("Saved CSV for " + attributeName);
+
+    //if (last) { process.exit(0); }
   });
 }

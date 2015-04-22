@@ -142,8 +142,12 @@ MongoClient.connect(url, function(err, db) {
       var y = (chosen < notChosen) ? notChosen : chosen;
 
       if (x == chosen) {
-        data.findAndModify({'x' : x, 'y' : y, 'attribute' : attribute}, [['x', 1]],
+        console.log(x + " chosen over " + y + " for " + attribute);
+        data.findOneAndUpdate({'x' : x, 'y' : y, 'attribute' : attribute},
           { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) {
+            if (err != null) {
+              console.log(err);
+            }
             users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : 
               userData[s.id].ip}, null, function(err, res) {
 
@@ -151,8 +155,12 @@ MongoClient.connect(url, function(err, db) {
           });
       }
       else if (y == chosen) {
-        data.findAndModify({'x' : x, 'y' : y, 'attribute' : attribute}, [['x', 1]],
+        console.log(y + " chosen over " + x + " for " + attribute);
+        data.findOneAndUpdate({'x' : x, 'y' : y, 'attribute' : attribute},
           { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) {
+            if (err != null) {
+              console.log(err);
+            }
             users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : 
               userData[s.id].ip}, null, function(err, res) {
 
