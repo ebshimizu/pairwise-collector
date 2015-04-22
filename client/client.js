@@ -55,14 +55,19 @@ function pickOption(optNo) {
   if (optNo == 1) {
     // preferred choice 1 over choice 2
     socket.emit('userSelected', choice1, choice2, currentAttribute);
+    $('#ex1 img').addClass('exampleConfirm');
   }
   else if (optNo == 2) {
     // preferred choice 2 over choice 1
     socket.emit('userSelected', choice2, choice1, currentAttribute);
+    $('#ex2 img').addClass('exampleConfirm');
   }
   // Indifferent option selected?
 
-  socket.emit('getAttributePair', currentAttribute);
+  $('#ex1 img').fadeOut(250);
+  $('#ex2 img').fadeOut(250, function() {
+    socket.emit('getAttributePair', currentAttribute);
+  });
 }
 
 $(document).ready(function() {
