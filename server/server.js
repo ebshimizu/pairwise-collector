@@ -10,23 +10,23 @@ var userData = {};
 app.listen(37018);
 
 function handler (req, res) {
-  http.get("http://graphics.cs.cmu.edu:80/" + req.url, function(r) {
-    res.writeHead(r.statusCode);
-    r.on('data', function(c) {
-      res.write(c);
-    }).on('end', function() { res.end(); });
-  });
-
-  //fs.readFile(__dirname + '/../client/index.html',
-  //function (err, data) {
-  //  if (err) {
-  //    res.writeHead(500);
-  //    return res.end('Error loading index.html');
-  //  }
-
-  //  res.writeHead(200);
-  //  res.end(data);
+  //http.get("http://graphics.cs.cmu.edu:80/" + req.url, function(r) {
+  //  res.writeHead(r.statusCode);
+  //  r.on('data', function(c) {
+  //    res.write(c);
+  //  }).on('end', function() { res.end(); });
   //});
+
+  fs.readFile(__dirname + '/../client/index.html',
+  function (err, data) {
+    if (err) {
+      res.writeHead(500);
+      return res.end('Error loading index.html');
+    }
+
+    res.writeHead(200);
+    res.end(data);
+  });
 }
 
 // Connection URL
@@ -67,72 +67,95 @@ MongoClient.connect(url, function(err, db) {
       settings.find({'type' : 'attribute'}).toArray(function(err, attrs) {
         s.emit('initStage', attrs);
       });
+
+      // Make sure user's data object exists in database
+      users.findOne({"user" : userData[s.id].username, "type" : "settings"}, function(doc, err) {
+        if (doc == null) {
+          users.insert({"user" : userData[s.id].username, "type" : "settings", "phase" : 1}, function(err, r) { });
+        }
+      });
     });
 
     s.on('getAttributePair', function(attribute) {
-      if (userData[s.id].cache.length == 0) {
-        console.log("User " + userData[s.id].username + " out of queued examples. Rengenerating...");
-				// Generating an attribute pair
-				// Should pull two random images that the user has not seen together yet.
-				// Available image pairs are stored in the settings collection with type "example"
-				// Need to do a series of queries here. Won't be terribly fast.
-				settings.find({'type' : 'example'}).sort({'id' : 1}).toArray(function(err, examples) {
-					var available = {};
+      // Get a user's data object
+      users.findOne({"user" : userData[s.id].username, "type" : "settings"}, function(usr, err) {
+        if (usr == null) {
+          // probably some sort of force reload of user client.
+        }
 
-					// enumerate possible pairings.
-					for (var i = 0; i < examples.length; i++) {
-						available[examples[i].id] = [];
-						for (var j = i + 1; j < examples.length; j++) {
-							available[examples[i].id].push(examples[j].id);
+        if (usr.phase == 1) {
+          // Phase 1 consists of a user doing exactly one comparison for each example, randomly selected
+          // Enumerate available elements
+          settings.find({'type' : 'example'}).sort({'id' : 1}).toArray(function(err, examples) {
+            users.find({'user' : userData[s.id].username, 'attribute' : attribute}).toArray(function(err, resp) {
+              var available = []
+              for (var i = 1; i < examples.length; i++) {
+                // List out available examples
+                available[i-1] = i;
+              }
+
+              // Delete examples user has already seen
+              for (var i = 0; i < resp.length; i++) {
+                // something something splice
+              }
+            });
+          });
+        });
+
+			// Generating an attribute pair
+			// Should pull two random images that the user has not seen together yet.
+			// Available image pairs are stored in the settings collection with type "example"
+			// Need to do a series of queries here. Won't be terribly fast.
+			settings.find({'type' : 'example'}).sort({'id' : 1}).toArray(function(err, examples) {
+				var available = {};
+
+				// enumerate possible pairings.
+				for (var i = 0; i < examples.length; i++) {
+					available[examples[i].id] = [];
+					for (var j = i + 1; j < examples.length; j++) {
+						available[examples[i].id].push(examples[j].id);
+					}
+				}
+
+				// Get list of things user has seen already
+				users.find({'user' : userData[s.id].username, 'attribute' : attribute}).toArray(function(err, comp) {
+					// remove things user has seen 
+					for (var i = 0; i < comp.length; i++) {
+						// entries are in the form: { p: id, q: id, ...}
+						var x1 = available[comp[i].x];
+						var idx = x1.indexOf(comp[i].y);
+
+						if (idx != -1)
+							x1.splice(idx, 1);
+					}
+
+					var pairs = [];
+
+					// reformat object for random selection 
+					for (var prop in available) {
+						if (!available.hasOwnProperty(prop)) {
+							continue;
+						}
+						for (var i = 0; i < available[prop].length; i++) {
+							pairs.push({"id1" : parseInt(prop), "id2" : available[prop][i]});
 						}
 					}
 
-					// Get list of things user has seen already
-					users.find({'user' : userData[s.id].username, 'attribute' : attribute}).toArray(function(err, comp) {
-						// remove things user has seen 
-						for (var i = 0; i < comp.length; i++) {
-							// entries are in the form: { p: id, q: id, ...}
-							var x1 = available[comp[i].x];
-							var idx = x1.indexOf(comp[i].y);
+					console.log("User " + userData[s.id].username + " has " + pairs.length + " examples remaining for attribute: " + attribute);
+					if (pairs.length == 0) {
+						s.emit('outOfExamples', attribute);
+						return;
+					}
 
-							if (idx != -1)
-								x1.splice(idx, 1);
-						}
+					for (var j = 0; j < 1000; j++) {
+						var selected = pairs[Math.floor(Math.random() * pairs.length)];
+						userData[s.id].cache.push(selected);
+					}
 
-						var pairs = [];
-
-						// reformat object for random selection 
-						for (var prop in available) {
-							if (!available.hasOwnProperty(prop)) {
-								continue;
-							}
-							for (var i = 0; i < available[prop].length; i++) {
-								pairs.push({"id1" : parseInt(prop), "id2" : available[prop][i]});
-							}
-						}
-
-						console.log("User " + userData[s.id].username + " has " + pairs.length + " examples remaining for attribute: " + attribute);
-						if (pairs.length == 0) {
-							s.emit('outOfExamples', attribute);
-							return;
-						}
-
-						for (var j = 0; j < 1000; j++) {
-							var selected = pairs[Math.floor(Math.random() * pairs.length)];
-							userData[s.id].cache.push(selected);
-						}
-
-						var selected = userData[s.id].cache.pop();  
-						s.emit('newPair', selected.id1, selected.id2);
-					})
-				});
-      }
-			else { 
-				// Pull entry from user cache and send back for speed
-				var selected = userData[s.id].cache.pop();  
-				s.emit('newPair', selected.id1, selected.id2);
-        console.log("Cached examples left for user " + userData[s.id].username + ": " + userData[s.id].cache.length);
-      }
+					var selected = userData[s.id].cache.pop();  
+					s.emit('newPair', selected.id1, selected.id2);
+				})
+			});
     });
 
     s.on('userSelected', function(chosen, notChosen, attribute) {
