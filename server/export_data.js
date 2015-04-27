@@ -32,8 +32,9 @@ function exportCSV(attributeName, data, numExamples, last) {
   var gather = {};
   
   // initialize object
-  for (var i = 0; i < numExamples; i++) {
-    gather[i + 1] = [];
+  // add one to number of examples for dummy element
+  for (var i = 0; i < numExamples + 1; i++) {
+    gather[i] = [];
   }
 
   // get all data from database relevant to attribute
@@ -52,8 +53,8 @@ function exportCSV(attributeName, data, numExamples, last) {
     if (typeof yPx === 'undefined') {
       yPx = 0;
     }
-    gather[x][y - 1] = yPx;
-    gather[y][x - 1] = xPy;
+    gather[x][y] = yPx;
+    gather[y][x] = xPy;
   },
   function(err) {
     console.log("writing out file for " + attributeName);
@@ -62,10 +63,10 @@ function exportCSV(attributeName, data, numExamples, last) {
     var out = "";
     // Write object to string
     // relies entirely on the assumption that the data is arranged with ids from 1-n
-    for (var i = 0; i < numExamples; i++) {
-      var line = gather[i + 1];
+    for (var i = 0; i < numExamples + 1; i++) {
+      var line = gather[i];
       var first = true;
-      for (var j = 0; j < numExamples; j++) {
+      for (var j = 0; j < numExamples + 1; j++) {
         if (!first) {
           out = out + ",";
         }
