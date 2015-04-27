@@ -65,6 +65,7 @@ body {
   height: auto;
   float: left;
   position: relative;
+  margin-bottom: 10px;
 }
 
 .exampleConfirm {
@@ -93,4 +94,26 @@ body {
   font-size: 16pt;
   display: block;
   margin: 0 0 10px 0;
+}
+
+#tracker {
+  position: fixed;
+  bottom: 10px;
+  left: 10px;
+  height: 1.2em;
+  width: 200px;
+  display: block;
+}
+
+#na {
+  width: 300px;
+  margin: 10px auto;
+  display: block;
+  font-size: 16pt;
+  text-align: center;
+  clear: both;
+}
+
+#na:hover {
+  cursor: pointer;
 }

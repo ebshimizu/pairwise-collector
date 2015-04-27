@@ -30,5 +30,5 @@ MongoClient.connect(url, function(err, db) {
   	 console.log("Inserted entry with id " + id);
   }
 
-  process.exit(0);
+  //process.exit(0);
 });

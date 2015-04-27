@@ -11,6 +11,10 @@ socket.on('connect', function(socket) {
   doSetup();
 });
 
+socket.on('reconnect', function(socket) {
+  location.reload();
+});
+
 socket.on('initStage', function(attrs) {
   // Hide login stuff.
   $("#welcome").fadeOut();
@@ -23,6 +27,7 @@ socket.on('initStage', function(attrs) {
   // Show attributes menu and message to instruct user to pick an attribute.
   $("#attributeMenu").fadeIn();
   $("#pairwise").fadeIn();
+  $('#na').hide();
   loggedIn = true;
 });
 
@@ -36,12 +41,19 @@ socket.on('newPair', function(ex1, ex2) {
 
   $("#ex1").html('<img src="images/' + ex1 + '.png" class="example left" />');
   $("#ex2").html('<img src="images/' + ex2 + '.png" class="example right" />');
+  $('#na').show();
 });
 
 socket.on('outOfExamples', function(attribute) {
   $('.prompt').html('No more comparisons needed for this attribute. Please select a new attribute.');
   $("#ex1").html("");
   $("#ex2").html("");
+  $('#na').hide();
+});
+
+socket.on('phaseUpdate', function(phase, remain) {
+  $("#tracker .phase").html("Phase " + phase);
+  $("#tracker .remain").html(" (" + remain + ")");
 });
 
 function doSetup() {
@@ -54,18 +66,23 @@ function doSetup() {
 function pickOption(optNo) {
   if (optNo == 1) {
     // preferred choice 1 over choice 2
-    socket.emit('userSelected', choice1, choice2, currentAttribute);
+    socket.emit('userSelected', choice1, choice2, true, currentAttribute);
     $('#ex1 img').addClass('exampleConfirm');
   }
   else if (optNo == 2) {
     // preferred choice 2 over choice 1
-    socket.emit('userSelected', choice2, choice1, currentAttribute);
+    socket.emit('userSelected', choice2, choice1, true, currentAttribute);
     $('#ex2 img').addClass('exampleConfirm');
+  }
+  else if (optNo == -1) {
+    socket.emit('userSelected', choice1, choice2, false, currentAttribute);
+    $('#na').addClass('exampleConfirm');
   }
   // Indifferent option selected?
 
   $('#ex1 img').fadeOut(250);
   $('#ex2 img').fadeOut(250, function() {
+    $('#na').removeClass('exampleConfirm');
     socket.emit('getAttributePair', currentAttribute);
   });
 }
@@ -77,8 +94,10 @@ $(document).ready(function() {
 
   $(document).on("keyup", function (e) {
     if (loggedIn) {
+      console.log(e.which);
       if (e.which == 37) pickOption(1);
       if (e.which == 39) pickOption(2);
+      if (e.which == 40) pickOption(-1);
     }
   });
 
@@ -88,6 +107,10 @@ $(document).ready(function() {
 
   $("#ex2").on("click", function() {
     pickOption(2);
+  });
+
+  $('#na').on("click", function() {
+    pickOption(-1);
   })
 
   $("#attribute").on( "selectmenuchange", function( event, ui ) {
