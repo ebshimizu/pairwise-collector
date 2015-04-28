@@ -117,3 +117,76 @@ body {
 #na:hover {
   cursor: pointer;
 }
+
+#controls {
+  position: fixed;
+  display: block;
+  height: 2em;
+  top: 0;
+  padding: 10px;
+  background-color: #1c1c1c;
+  width: 100%;
+  border-bottom: 2px black solid;
+  z-index: 1000;
+}
+
+#controls .title,
+#controls .filter,
+#controls .sort,
+#controls .display
+{
+  display: block;
+  height: 2em;
+  float: left;
+  margin: auto 10px auto 0;
+  vertical-align: middle;
+  line-height: 2em;
+  width: 22%;
+}
+
+#controls .ui-button-text-only,
+#controrls .ui-button-text {
+  font-size: 8pt;
+}
+
+.subtitle {
+  display: block;
+  float: left;
+  margin-right: 5px;
+}
+
+.item {
+  width: 10%;
+  height: auto;
+  position: relative;
+}
+
+.item img {
+  width: 100%;
+  height: auto;
+}
+
+#results {
+  margin-top: 43px;
+}
+
+.id-label {
+  position: absolute;
+  font-size: 8pt;
+  top: 5px;
+  left: 5px;
+}
+
+.label-label {
+  position: absolute;
+  font-size: 8pt;
+  top: 5px;
+  right: 5px;
+}
+
+.pred-label {
+  position: absolute;
+  font-size: 8pt;
+  bottom: 5px;
+  right: 5px;
+}
