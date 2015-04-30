@@ -7,7 +7,7 @@ var io = require('socket.io')(app);
 var fs = require('fs');
 var userData = {};
 
-app.listen(37018);
+app.listen(37019);
 
 function shuffle(array) {
   var i = array.length, j = 0, temp;
@@ -27,23 +27,23 @@ function shuffle(array) {
 
 
 function handler (req, res) {
-  //http.get("http://graphics.cs.cmu.edu:80/" + req.url, function(r) {
-  //  res.writeHead(r.statusCode);
-  //  r.on('data', function(c) {
-  //    res.write(c);
-  //  }).on('end', function() { res.end(); });
-  //});
-
-  fs.readFile(__dirname + '/../client/index.html',
-  function (err, data) {
-    if (err) {
-      res.writeHead(500);
-      return res.end('Error loading index.html');
-    }
-
-    res.writeHead(200);
-    res.end(data);
+  http.get("http://graphics.cs.cmu.edu:80/" + req.url, function(r) {
+    res.writeHead(r.statusCode);
+    r.on('data', function(c) {
+      res.write(c);
+    }).on('end', function() { res.end(); });
   });
+
+  //fs.readFile(__dirname + '/../client/index.html',
+  //function (err, data) {
+  //  if (err) {
+  //    res.writeHead(500);
+  //    return res.end('Error loading index.html');
+  //  }
+
+  //  res.writeHead(200);
+  //  res.end(data);
+  //});
 }
 
 function getPair(s, users, settings, attribute) {
@@ -94,7 +94,7 @@ function getPair(s, users, settings, attribute) {
               y = Math.floor(Math.random() * arr.length);
             }
 
-            s.emit('phaseUpdate', 1, Math.floor(arr.length - 2) + 1);
+            s.emit('phaseUpdate', 1, Math.floor((arr.length - 2) / 2) + 1);
             s.emit('newPair', arr[x], arr[y]);
           }
         });
@@ -172,7 +172,7 @@ function getPair(s, users, settings, attribute) {
 }
 
 // Connection URL
-var url = 'mongodb://localhost:27017/pairwise-collector';
+var url = 'mongodb://localhost:27017/attributes';
 
 // Use connect method to connect to the Server
 MongoClient.connect(url, function(err, db) {
