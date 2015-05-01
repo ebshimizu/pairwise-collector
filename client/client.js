@@ -118,7 +118,8 @@ $(document).ready(function() {
       $("#blankAttribute").hide();
       $("#initialPrompt").html("");
     }
-    currentAttribute = event.toElement.innerHTML;
+    var target = event.toElement || event.target;
+    currentAttribute = target.innerHTML;
 
     if (currentAttribute === "") {
       // do nothing with the blank attribute.

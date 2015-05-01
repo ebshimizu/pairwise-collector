@@ -247,17 +247,19 @@ MongoClient.connect(url, function(err, db) {
     s.on('disconnect', function() {
       delete userData[s.id];
     });
-  });
-
-  // Streams the comparison data for a specified scene ID back to the client.
-  // Sends a finished message when done
-  s.on('getComparisons', function(id, attribute) {
-    data.find({{ $or: [ {'x' : id }, { 'y' : id } ]}, "attribute" : attribute }).forEach(function(doc) {
-      s.emit('compData', doc.x, doc.y, doc.xPy, doc.yPx);
-    }, function(err) {
-      s.emit('compDataComplete', id);
+    
+    // Streams the comparison data for a specified scene ID back to the client.
+    // Sends a finished message when done
+    s.on('getComparisons', function(id, attribute) {
+      console.log("Requesting comparisons for " + id + " for attribute " + attribute);
+      data.find({ $or: [ {'x' : id }, { 'y' : id } ], "attribute" : attribute }).forEach(function(doc) {
+        s.emit('compData', doc.x, doc.y, doc.xPy, doc.yPx);
+      }, function(err) {
+        s.emit('compDataComplete', id);
+      });
     });
   });
+
 
 
 });
