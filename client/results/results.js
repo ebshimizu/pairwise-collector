@@ -44,7 +44,26 @@ $( document ).ready(function() {
 
 	$("#filterButtons").on( "click", "input", function() {
 		var filterVal = $(this).attr("data-filter-by");
-		$("#results").isotope({ filter: filterVal });
+
+		// predicted above threshold
+		if (filterVal === "pthresh") {
+			var threshold = parseFloat($('#threshold').attr('threshold'));
+			$("#results").isotope({ filter: function() {
+				var pred = $(this).attr('pred');
+				return parseFloat(pred) > threshold;
+			}});
+		}
+		// Actual above threshold
+		else if (filterVal === "lthresh") {
+			var threshold = parseFloat($('#threshold').attr('threshold'));
+			$("#results").isotope({ filter: function() {
+				var label = $(this).attr('label');
+				return parseFloat(label) > threshold;
+			}});
+		}
+		else {
+			$("#results").isotope({ filter: filterVal });
+		}
 	});
 
 	$("#displayButtons").on( "click", "input", function() {
