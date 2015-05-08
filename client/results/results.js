@@ -71,7 +71,8 @@ $( document ).ready(function() {
 		$(".compFor").hide();
 		$(".compAgainst").hide();
 
-		$("#results").isotope({ filter: '.test' });
+		$("#test").click();
+		$("#pred").click();
 	});
 });
 
