@@ -27,12 +27,12 @@ function shuffle(array) {
 
 
 function handler (req, res) {
-  http.get("http://graphics.cs.cmu.edu:80/" + req.url, function(r) {
-    res.writeHead(r.statusCode);
-    r.on('data', function(c) {
-      res.write(c);
-    }).on('end', function() { res.end(); });
-  });
+  //http.get("http://graphics.cs.cmu.edu:80/" + req.url, function(r) {
+  //  res.writeHead(r.statusCode);
+  //  r.on('data', function(c) {
+  //    res.write(c);
+  //  }).on('end', function() { res.end(); });
+  //});
 
   //fs.readFile(__dirname + '/../client/index.html',
   //function (err, data) {
@@ -230,7 +230,6 @@ MongoClient.connect(url, function(err, db) {
       }
       else {
         data.findOneAndUpdate({'x' : 0, 'y' : chosen, 'attribute' : attribute }, { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
-        data.findOneAndUpdate({'x' : 0, 'y' : notChosen, 'attribute' : attribute }, { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
         users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'type' : "response", 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : userData[s.id].ip}, null, function(err, res) { });
 
         if (x == chosen) {

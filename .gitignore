@@ -29,3 +29,5 @@ node_modules
 
 client/images
 client/thumbs
+client/images_old
+client/small
