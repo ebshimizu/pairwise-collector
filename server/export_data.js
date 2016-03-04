@@ -32,8 +32,7 @@ function exportCSV(attributeName, data, numExamples, last) {
   var gather = {};
   
   // initialize object
-  // add one to number of examples for dummy element
-  for (var i = 0; i < numExamples + 1; i++) {
+  for (var i = 1; i <= numExamples; i++) {
     gather[i] = [];
   }
 
@@ -63,10 +62,10 @@ function exportCSV(attributeName, data, numExamples, last) {
     var out = "";
     // Write object to string
     // relies entirely on the assumption that the data is arranged with ids from 1-n
-    for (var i = 0; i < numExamples + 1; i++) {
+    for (var i = 1; i <= numExamples; i++) {
       var line = gather[i];
       var first = true;
-      for (var j = 0; j < numExamples + 1; j++) {
+      for (var j = 1; j <= numExamples; j++) {
         if (!first) {
           out = out + ",";
         }

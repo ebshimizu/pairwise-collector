@@ -56,51 +56,8 @@ function getPair(s, users, settings, attribute) {
       return;
     }
 
-    if (usr.phase == 1) {
-      // Phase 1 consists of a user doing exactly one comparison for each example, randomly selected
-      // Enumerate available elements
-      settings.find({'type' : 'example'}).sort({'id' : 1}).toArray(function(err, examples) {
-        users.find({'user' : userData[s.id].username, 'type' : 'response', 'attribute' : attribute}).toArray(function(err, resp) {
-          var available = {};
-          for (var i = 0; i < examples.length; i++) {
-            // List out available examples
-            available[examples[i].id] = examples[i].id;
-          }
-
-          // Delete examples user has already seen
-          for (var i = 0; i < resp.length; i++) {
-            delete available[resp[i].x];
-            delete available[resp[i].y];
-          }
-
-          // Flatten
-          arr = Object.keys(available).map(function (key) {return available[key]});
-
-          // if the resulting array is of length 1
-          if (arr.length == 1) {
-            s.emit('newPair', arr[0], Math.floor(Math.random() * examples.length) + 1);
-          }
-          else if (arr.length == 0) {
-            // move to phase 2
-            users.findOneAndUpdate({"user" : userData[s.id].username, "type" : "phase", "attribute" : attribute}, {$set : {"phase" : 2}}, function(err, r) {
-              getPair(s, users, settings, attribute);
-            });
-          }
-          else {
-            var x = Math.floor(Math.random() * arr.length);
-            var y = Math.floor(Math.random() * arr.length);
-
-            while (x == y) {
-              y = Math.floor(Math.random() * arr.length);
-            }
-
-            s.emit('phaseUpdate', 1, Math.floor((arr.length - 2) / 2) + 1);
-            s.emit('newPair', arr[x], arr[y]);
-          }
-        });
-      });
-    }
-    else if (usr.phase == 2) {  
+    // Phase 1 does an exhaustive comparison of all elements in the database
+    if (usr.phase == 1) {  
       if (userData[s.id].cache.length == 0) {
         // Generating an attribute pair
         // Should pull two random images that the user has not seen together yet.
@@ -156,7 +113,7 @@ function getPair(s, users, settings, attribute) {
 
             var selected = userData[s.id].cache.pop();
             userData[s.id].remain = pairs.length - 1;
-            s.emit('phaseUpdate', 2, pairs.length - 1);
+            s.emit('phaseUpdate', 1, pairs.length - 1);
             s.emit('newPair', selected.id1, selected.id2);
           })
         });
@@ -164,11 +121,39 @@ function getPair(s, users, settings, attribute) {
       else {
         var selected = userData[s.id].cache.pop();
         userData[s.id].remain = userData[s.id].remain - 1;
-        s.emit('phaseUpdate', 2, userData[s.id].remain);
+        s.emit('phaseUpdate', 1, userData[s.id].remain);
         s.emit('newPair', selected.id1, selected.id2);
       }
     }
   });
+}
+
+function makeComparison(chosen, notChosen, relevant, attribute, users, data, s) {
+  // Save the entry in the main results database
+  // entries are stored with p < q
+  var x = (chosen < notChosen) ? chosen : notChosen;
+  var y = (chosen < notChosen) ? notChosen : chosen;
+
+  if (relevant === false) {
+    // choices were irrelevant
+    console.log("Pair " + x + " and " + y + " irrelevant for " + attribute);
+    //data.findOneAndUpdate({'x' : 0, 'y' : chosen, 'attribute' : attribute }, { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });
+    //data.findOneAndUpdate({'x' : 0, 'y' : notChosen, 'attribute' : attribute }, { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });
+    users.insert({'x' : x, 'y' : y, 'choice' : 0, 'type' : 'response', 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : userData[s.id].ip}, null, function(err, res) { });
+  }
+  else {
+    //data.findOneAndUpdate({'x' : 0, 'y' : chosen, 'attribute' : attribute }, { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
+    users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'type' : "response", 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : userData[s.id].ip}, null, function(err, res) { });
+
+    if (x == chosen) {
+      console.log(x + " chosen over " + y + " for " + attribute);
+      data.findOneAndUpdate({'x' : x, 'y' : y, 'attribute' : attribute}, { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });          
+    }
+    else if (y == chosen) {
+      console.log(y + " chosen over " + x + " for " + attribute);
+      data.findOneAndUpdate({'x' : x, 'y' : y, 'attribute' : attribute}, { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
+    }
+  }
 }
 
 // Connection URL
@@ -216,31 +201,20 @@ MongoClient.connect(url, function(err, db) {
     });
 
     s.on('userSelected', function(chosen, notChosen, relevant, attribute) {
-      // Save the entry in the main results database
-      // entries are stored with p < q
-      var x = (chosen < notChosen) ? chosen : notChosen;
-      var y = (chosen < notChosen) ? notChosen : chosen;
+      makeComparison(chosen, notChosen, relevant, attribute, users, data, s);
+    });
 
-      if (relevant === false) {
-        // choices were irrelevant
-        console.log("Pair " + x + " and " + y + " irrelevant for " + attribute);
-        data.findOneAndUpdate({'x' : 0, 'y' : chosen, 'attribute' : attribute }, { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });
-        data.findOneAndUpdate({'x' : 0, 'y' : notChosen, 'attribute' : attribute }, { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });
-        users.insert({'x' : x, 'y' : y, 'choice' : 0, 'type' : 'response', 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : userData[s.id].ip}, null, function(err, res) { });
-      }
-      else {
-        data.findOneAndUpdate({'x' : 0, 'y' : chosen, 'attribute' : attribute }, { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
-        users.insert({'x' : x, 'y' : y, 'choice' : chosen, 'type' : "response", 'attribute' : attribute, 'user' : userData[s.id].username, 'ip' : userData[s.id].ip}, null, function(err, res) { });
-
-        if (x == chosen) {
-          console.log(x + " chosen over " + y + " for " + attribute);
-          data.findOneAndUpdate({'x' : x, 'y' : y, 'attribute' : attribute}, { $inc: { 'xPy' : 1 } }, { 'upsert' : true }, function(err, doc) { });          
+    s.on('userDeclaredIrrelevant', function(x, attribute) {
+      // In this instance, the user has declared that an example is automatically ranked below
+      // every other possible example for this example. In this case, we'll make those comparisons for the user
+      settings.find({'type' : 'example'}).sort({'id' : 1}).toArray(function(err, examples) {
+        // enumerate all pairings with this example
+        for (var i = 0; i < examples.length; i++) {
+          if (i !== x) {
+            makeComparison(i, x, true, attribute, users, data, s);
+          }
         }
-        else if (y == chosen) {
-          console.log(y + " chosen over " + x + " for " + attribute);
-          data.findOneAndUpdate({'x' : x, 'y' : y, 'attribute' : attribute}, { $inc: { 'yPx' : 1 } }, { 'upsert' : true }, function(err, doc) { });
-        }
-      }
+      });
     });
 
     s.on('disconnect', function() {
@@ -258,7 +232,4 @@ MongoClient.connect(url, function(err, db) {
       });
     });
   });
-
-
-
 });

@@ -28,6 +28,8 @@ socket.on('initStage', function(attrs) {
   $("#attributeMenu").fadeIn();
   $("#pairwise").fadeIn();
   $('#na').hide();
+  $("#na1").hide();
+  $("#na2").hide();
   loggedIn = true;
 });
 
@@ -75,8 +77,10 @@ function pickOption(optNo) {
     $('#ex2 img').addClass('exampleConfirm');
   }
   else if (optNo == -1) {
-    socket.emit('userSelected', choice1, choice2, false, currentAttribute);
-    $('#na').addClass('exampleConfirm');
+    socket.emit('userDeclaredIrrelevant', choice1, currentAttribute);
+  }
+  else if (optNo == -2) {
+    socket.emit('userDeclaredIrrelevant', choice2, currentAttribute);
   }
   // Indifferent option selected?
 
@@ -97,7 +101,7 @@ $(document).ready(function() {
       console.log(e.which);
       if (e.which == 37) pickOption(1);
       if (e.which == 39) pickOption(2);
-      if (e.which == 40) pickOption(-1);
+      //if (e.which == 40) pickOption(-1);
     }
   });
 
@@ -109,14 +113,20 @@ $(document).ready(function() {
     pickOption(2);
   });
 
-  $('#na').on("click", function() {
+  $('#na1').on("click", function() {
     pickOption(-1);
-  })
+  });
+
+  $('#na2').on("click", function() {
+    pickOption(-2);
+  });  
 
   $("#attribute").on( "selectmenuchange", function( event, ui ) {
     if (currentAttribute === "") {
       $("#blankAttribute").hide();
       $("#initialPrompt").html("");
+      $("#na1").hide();
+      $("#na2").hide();
     }
     var target = event.toElement || event.target;
     currentAttribute = target.innerHTML;
@@ -126,6 +136,8 @@ $(document).ready(function() {
       return;
     }
     $(".prompt").html('Please click the image that is more "' + currentAttribute + '"');
+    $("#na1").show();
+    $("#na2").show();
     socket.emit('getAttributePair', currentAttribute);
   });
 
