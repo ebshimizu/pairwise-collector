@@ -20,8 +20,9 @@ for attr in attrs:
 	print ("Exporting data for " + attr["name"])
 	gather = {}
 
-	for i in range(1, examples.count() + 1):
-		gather[i] = [0]*examples.count()
+	fexamples = db.settings.find({"type" : "example", "attribute" : attr })
+	for i in range(1, fexamples.count() + 1):
+		gather[i] = [0]*fexamples.count()
 
 	data = db.data.find({"attribute" : attr["name"]})
 
@@ -50,14 +51,13 @@ for attr in attrs:
 
 	f.write("\n".join(strings))
 
+	features = [""] * (examples.count()+1)
 
-features = [""] * (examples.count()+1);
+	print ("Exporting feature vectors")
+	# Output features as well
+	for example in fexamples:
+		features[example["id"]] = example["descriptor"]
 
-print ("Exporting feature vectors")
-# Output features as well
-for example in examples:
-	features[example["id"]] = example["descriptor"]
-
-features.pop(0);
-f = open(outputLoc + "/" + "features.csv", 'w')
-f.write("\n".join(features))
+	features.pop(0)
+	f = open(outputLoc + "/" + attr + "_features.csv", 'w')
+	f.write("\n".join(features))
