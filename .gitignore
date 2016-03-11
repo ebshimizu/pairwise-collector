@@ -31,3 +31,5 @@ client/images
 client/thumbs
 client/images_old
 client/small
+client/results
+server/out
