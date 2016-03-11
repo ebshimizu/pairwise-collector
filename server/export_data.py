@@ -4,6 +4,8 @@ from pymongo import MongoClient
 import sys
 import os
 
+outputLoc = sys.argv[1]
+
 client = MongoClient('localhost', 27017)
 db = client.attributes
 
@@ -39,7 +41,7 @@ for attr in attrs:
 		gather[y][x-1] = xPy
 
 	# write data object to csv
-	f = open(attr["name"] + ".csv", 'w')
+	f = open(outputLoc + "/" + attr["name"] + ".csv", 'w')
 	strings = []
 
 	for row in gather:
@@ -57,5 +59,5 @@ for example in examples:
 	features[example["id"]] = example["descriptor"]
 
 features.pop(0);
-f = open("features.csv", 'w')
+f = open(outputLoc + "/" + "features.csv", 'w')
 f.write("\n".join(features))
