@@ -59,7 +59,7 @@ function getPair(s, users, settings, attribute) {
     // Phase 1 does an exhaustive comparison of all elements in the database
     // Other phases just open up the entire space for sampling
     if (userData[s.id].cache.length == 0) {
-      var query = {'type' : 'example'};
+      var query = {'type' : 'example', "attribute" : attribute};
       if (usr.phase == 1) {
         query.phase = 1;
       }
