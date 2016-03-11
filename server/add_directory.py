@@ -5,7 +5,9 @@ from pymongo import MongoClient
 import sys
 import os
 
-dir = sys.argv[1]
+phase = sys.argv[1]
+scene = sys.argv[2]
+dir = sys.argv[3]
 
 client = MongoClient('localhost', 27017)
 db = client.attributes
@@ -21,7 +23,7 @@ for f in files:
 		descriptor = "";
 		with open(dir + '/' + name + '.csv', 'r') as csvFile:
 			descriptor = csvFile.read()
-		img = { "id" : int(name), "type" : "example", "filename" : f, "descriptor" : descriptor}
+		img = { "id" : int(name), "type" : "example", "filename" : f, "descriptor" : descriptor, "scene" : scene, "phase" : int(phase) }
 		res = settings.replace_one({"id" : int(name)}, img, True)
 
 		if (res.matched_count == 1):
