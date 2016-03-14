@@ -1,4 +1,4 @@
-function [ model ] = create_model(libsvm_args, holdout_percent, seed, model_name, dir_prefix, attr_name, featureFile)
+function [ model ] = create_model(libsvm_args, holdout_percent, seed, model_name, dir_prefix, attr_name)
 %CREATE_MODEL Generate a model from the given inputs
 %   Does the following things:
 %   -Creates a model using the provide command line string to libsvm
@@ -11,17 +11,16 @@ function [ model ] = create_model(libsvm_args, holdout_percent, seed, model_name
 
 addpath('/usr2/eshimizu/attributes/libsvm/matlab');
 
-%note that element 0 (element 1) in the labels has no features and should be excluded
-
+% load data
 original_labels = csvread(['../labels/', model_name, '.csv']);
-instance = csvread(['../features/', featureFile, '.csv']);
+instance = csvread(['../features/', model_name, '_features.csv']);
 
 % normalize labels
-original_labels = log(original_labels);
+% original_labels = log(original_labels);
 original_labels = original_labels - min(original_labels);
 original_labels = original_labels / max(original_labels);
 
-labels = original_labels(2:size(original_labels, 1));
+% labels = original_labels(2:size(original_labels, 1));
 
 c = ags1(libsvm_args, model_name, 5);
 libsvm_args = [libsvm_args, ' -c ', num2str(c)];

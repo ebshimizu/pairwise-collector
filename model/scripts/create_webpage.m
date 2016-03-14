@@ -1,4 +1,4 @@
-function [ output_args ] = create_webpage(labels, instance, model, test_idx, train_idx, libsvm_args, model_name, dir_prefix, seed, attr_name, thresh )
+function [ ] = create_webpage(labels, instance, model, test_idx, train_idx, libsvm_args, model_name, dir_prefix, seed, attr_name, thresh )
 %CREATE_WEBPAGE Outputs a webpage that displays the results of the
 % regression.
 
@@ -25,7 +25,7 @@ for i = 1:size(labels,1)
     
     fprintf(fileID, '" exid="%g" label="%.6f" pred="%.6f">\n', i, labels(i), pred(i));
     fprintf(fileID, '\t\t\t<div class="id-label">%g</div>\n\t\t\t<div class="label-label">%.6f</div>\n\t\t\t<div class="pred-label">%.6f</div>\n',i, labels(i), pred(i));
-    fprintf(fileID, '\t\t\t<img src="http://graphics.cs.cmu.edu/projects/lighting/collector/client/thumbs/%g.png" />\n', i);
+    fprintf(fileID, '\t\t\t<img src="http://graphics.cs.cmu.edu/projects/lighting/pairwise-collector/client/images/%g.png" />\n', i);
     fprintf(fileID, '\t\t\t<div class="compFor"></div>\n\t\t\t<div class="compAgainst"></div>\n\t\t</div>\n');
 end
 
