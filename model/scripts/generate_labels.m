@@ -4,7 +4,7 @@ function [ ] = generate_labels( data_path, output_path )
 
 data = csvread(data_path);
 labels = scale_map(data');
-csvwrite(labels, output_path);
+csvwrite(output_path, labels);
 
 end
 
