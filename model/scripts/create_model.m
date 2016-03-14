@@ -25,7 +25,7 @@ original_labels = original_labels / max(original_labels);
 c = ags1(libsvm_args, model_name, 5, original_labels, instance);
 libsvm_args = [libsvm_args, ' -c ', num2str(c)];
 
-[model, trl, tri, tel, tei, train_idx, test_idx] = random_split(labels, instance, libsvm_args, holdout_percent, seed);
+[model, trl, tri, tel, tei, train_idx, test_idx] = random_split(original_labels, instance, libsvm_args, holdout_percent, seed);
 svm_savemodel(model, [dir_prefix, model_name, '.svm']);
 save_svm_stats(labels, model, tel, tei, test_idx, train_idx, seed, libsvm_args, [dir_prefix, model_name]);
 create_webpage(labels, instance, model, test_idx, train_idx, libsvm_args, model_name, dir_prefix, seed, attr_name, original_labels(1));
