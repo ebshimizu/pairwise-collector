@@ -32,7 +32,7 @@ create_webpage(original_labels, instance, model, test_idx, train_idx, libsvm_arg
 
 % select some elements for further sampling.
 pred = svmpredict(original_labels, instance, model);
-select_samples(original_labels, pred, dir_prefix, 25);
+select_samples(original_labels, pred, dir_prefix, model_name, 25);
 
 %sorted_images(labels, instance, model, 10, [dir_prefix, model_name]);
 %sorted_images_novel(labels, instance, model, test_idx, 10, [dir_prefix, model_name]);
