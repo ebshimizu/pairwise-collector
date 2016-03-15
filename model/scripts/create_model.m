@@ -29,6 +29,11 @@ libsvm_args = [libsvm_args, ' -c ', num2str(c)];
 svm_savemodel(model, [dir_prefix, model_name, '.svm']);
 save_svm_stats(original_labels, model, tel, tei, test_idx, train_idx, seed, libsvm_args, [dir_prefix, model_name]);
 create_webpage(original_labels, instance, model, test_idx, train_idx, libsvm_args, model_name, dir_prefix, seed, attr_name, original_labels(1));
+
+% select some elements for further sampling.
+pred = svmpredict(original_labels, instance, model);
+select_samples(original_labels, pred, dir_prefix, 25);
+
 %sorted_images(labels, instance, model, 10, [dir_prefix, model_name]);
 %sorted_images_novel(labels, instance, model, test_idx, 10, [dir_prefix, model_name]);
 

@@ -33,3 +33,8 @@ client/images_old
 client/small
 client/results
 server/out
+model/results
+model/raw_data
+model/features
+model/labels
+model/results
