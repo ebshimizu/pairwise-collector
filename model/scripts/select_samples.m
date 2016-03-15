@@ -10,6 +10,7 @@ if (size(labels, 1) >= maxElems)
 end
 
 csvwrite([out_dir, model_name, '_samples.csv'], elems');
+csvwrite([out_dir, model_name, '_startIdx.csv'], size(labels, 1) + 1);
 
 end
 
